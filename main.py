@@ -50,10 +50,7 @@ def webhook():
         if "reply_to_message" in message:
             replied = message["reply_to_message"]
             original = replied.get("text", "[non-text content]")
-            forward = f"@{sender} replied to:
-"{original}"
-
-{text}"
+            forward = f"@{sender} replied to:\n\"{original}\"\n\n{text}"
         else:
             forward = f"From @{sender}:
 {text}"
