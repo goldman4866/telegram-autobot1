@@ -46,8 +46,7 @@ def webhook():
 
     if "text" in message:
         text = message["text"]
-        forward = f"From @{sender}:
-{text}"
+        forward = f"From @{sender}:\n{text}"
         send_message(TARGET_USER_ID, forward)
         send_message(chat_id, "Message received.")
 
