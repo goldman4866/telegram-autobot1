@@ -45,11 +45,17 @@ def webhook():
     chat_id = message["chat"]["id"]
 
     if "text" in message:
-        text = message["text"]
+    text = message["text"]
+    
+    if "reply_to_message" in message:
+        replied = message["reply_to_message"]
+        original = replied.get("text", "[non-text content]")
+        forward = f"@{sender} replied to:\n\"{original}\"\n\n{text}"
+    else:
         forward = f"From @{sender}:\n{text}"
-        send_message(TARGET_USER_ID, forward)
-        send_message(chat_id, "Message received.")
 
+    send_message(TARGET_USER_ID, forward)
+    send_message(chat_id, "Message received.")
     elif "photo" in message:
         file_id = message["photo"][-1]["file_id"]
         caption = message.get("caption", f"Photo from @{sender}")
