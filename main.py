@@ -8,7 +8,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 TARGET_USER_ID = os.getenv("TARGET_USER_ID")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
-# ??????? ??? ?????????? ???????????? message_id ? user_id
+# Словарь для сохранения соответствия message_id → user_id
 replies = {}
 
 def send_message(chat_id, text):
@@ -50,14 +50,14 @@ def webhook():
     if "text" in message:
         text = message["text"]
 
-        # ???? ??? ???????? ????????? ?? ???????????? (?? ?? ????)
+        # Если это входящее сообщение от пользователя (не от тебя)
         if str(chat_id) != str(TARGET_USER_ID):
             replies[message["message_id"]] = chat_id
             forward = f"From @{sender}:\n{text}"
             send_message(TARGET_USER_ID, forward)
             send_message(chat_id, "Message received.")
 
-        # ???? ??? ?? ????????? ?? ????????? (reply)
+        # Если это ты отвечаешь на сообщение (reply)
         elif "reply_to_message" in message:
             replied_text = message["reply_to_message"].get("text", "")
             for user_id in set(replies.values()):
