@@ -8,6 +8,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 TARGET_USER_ID = os.getenv("TARGET_USER_ID")
 API_URL = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
+# ??????? ??? ?????????? ???????????? message_id ? user_id
+replies = {}
+
 def send_message(chat_id, text):
     url = f"{API_URL}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
@@ -47,15 +50,20 @@ def webhook():
     if "text" in message:
         text = message["text"]
 
-        if "reply_to_message" in message:
-            replied = message["reply_to_message"]
-            original = replied.get("text", "[non-text content]")
-            forward = f"@{sender} replied to:\n\"{original}\"\n\n{text}"
-        else:
+        # ???? ??? ???????? ????????? ?? ???????????? (?? ?? ????)
+        if str(chat_id) != str(TARGET_USER_ID):
+            replies[message["message_id"]] = chat_id
             forward = f"From @{sender}:\n{text}"
+            send_message(TARGET_USER_ID, forward)
+            send_message(chat_id, "Message received.")
 
-        send_message(TARGET_USER_ID, forward)
-        send_message(chat_id, "Message received.")
+        # ???? ??? ?? ????????? ?? ????????? (reply)
+        elif "reply_to_message" in message:
+            replied_text = message["reply_to_message"].get("text", "")
+            for user_id in set(replies.values()):
+                if replied_text.startswith("From @"):
+                    send_message(user_id, text)
+                    break
 
     elif "photo" in message:
         file_id = message["photo"][-1]["file_id"]
